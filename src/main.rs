@@ -45,9 +45,10 @@ fn main() {
     // set up vertex buffer object
 
     let vertices: Vec<f32> = vec![
-        -0.5, -0.5, 0.0,
-        0.5, -0.5, 0.0,
-        0.0, 0.5, 0.0
+        // positions        // colours
+        -0.5, -0.5, 0.0,    1.0, 0.0, 0.0,  // bottom right
+        0.5, -0.5, 0.0,     0.0, 1.0, 0.0,  // bottom left
+        0.0, 0.5, 0.0,      0.0, 0.0, 1.0   // top
         ];
         
     let mut vbo: GLuint = 0;
@@ -74,14 +75,26 @@ fn main() {
         gl::GenVertexArrays(1, &mut vao); 
         gl::BindVertexArray(vao);
         gl::BindBuffer(ARRAY_BUFFER, vbo);
+       
         gl::EnableVertexAttribArray(0);
         gl::VertexAttribPointer(
             0, 
             3, 
             FLOAT, 
             FALSE, 
-        (3 * std::mem::size_of::<f32>()) as GLint, 
+        (6 * std::mem::size_of::<f32>()) as GLint,   // now that the colour information has been added the stride is 6
         std::ptr::null()
+        );
+
+
+        gl::EnableVertexAttribArray(1); // index 1 is the colour information
+        gl::VertexAttribPointer(
+            1, 
+            3, 
+            FLOAT, 
+            FALSE, 
+        (6 * std::mem::size_of::<f32>()) as GLint, 
+        (3 * std::mem::size_of::<f32>()) as *const GLvoid
     );
     
         gl::BindBuffer(ARRAY_BUFFER, 0);
@@ -91,7 +104,7 @@ fn main() {
 
         unsafe {
             gl::Viewport(0, 0, 900, 700); 
-            gl::ClearColor(1.0, 0.0, 0.0, 1.0); 
+            gl::ClearColor(0.3, 0.3, 0.5, 1.0); 
         }
         
         
@@ -108,6 +121,7 @@ fn main() {
             }
             
             shader_program.set_used();
+            unsafe{ gl::Clear(gl::COLOR_BUFFER_BIT); }
             unsafe {
                 gl::BindVertexArray(vao);
                 gl::DrawArrays(
@@ -118,7 +132,6 @@ fn main() {
             }
 
             //Render window contents here
-           // unsafe{ gl::Clear(gl::COLOR_BUFFER_BIT); }
 
             window.gl_swap_window();
 
